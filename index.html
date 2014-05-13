@@ -1,0 +1,141 @@
+<html>
+<body>
+  <pre>
+  <div id="test">
+  </div>
+  </pre>
+</body>
+
+<script>
+
+  console.log( get_equality('a', 'a'))
+  console.log( get_equality('aaaaabbbbb', 'bbbbabaaaa'))
+  console.log( get_equality('bfkegkudem', 'kfpozexksm'))
+
+  console.log( generate_first() )
+  console.log( get_equality(generate_first(), generate_first()) )
+
+  var x = generate_first();
+  var y = {gene: generate_first()};
+  console.log(x, y);
+  steal_gene( /* from: */ x , /* to: */ y )
+  console.log(x, y);
+
+  var mat = [];
+  var line = [];
+
+  for (var i = 1; i< 10; i=i+1) {
+    line = [];
+    for (var j = 1; j < 10; j=j+1) {
+      line[j] = {gene: generate_first(), eq: 0};
+    }
+    mat[i] = line;
+  }
+
+
+  console.log(mat);
+
+  var start = function() {
+    window.setTimeout( function() {
+      output(mat);
+      check_eq(mat);
+      steal_all(mat);
+      start();
+    }, 3);
+  }
+
+  start();
+
+  function output(mat) {
+    var html = '';
+    for (var i=1; i < 10; i=i+1) {
+      for (var j=1; j < 10; j=j+1) {
+        html = html + ' ' + '<span style="color:' + mat[i][j].eq + '">' + mat[i][j].gene + '</span>';
+      }
+      html = html + '<br/>';
+    }
+    document.getElementById('test').innerHTML = html;
+  }
+
+  function steal_all(mat) {
+    for (var i=1; i < 10; i=i+1) {
+      for (var j=1; j < 10; j=j+1) {
+        var x_plus = Math.round(Math.random());
+        var y_plus = Math.round(Math.random());
+        var x = Math.round(Math.random());
+        var y = Math.round(Math.random());
+
+        if (x_plus == 0) x = x * -1;
+        if (y_plus == 0) y = y * -1;
+
+        if (mat[i + x] && mat[i + x][j + y] && mat[i + x][j + y].eq) {
+          if (mat[i][j].eq < mat[i + x][j + y].eq) {
+            steal_gene(mat[i + x][j + y].gene, mat[i][j]);
+          }
+        }
+
+      }
+    }
+  }
+
+  function check_eq(mat) {
+    for (var i=1; i < 10; i=i+1) {
+      for (var j=1; j < 10; j=j+1) {
+        mat[i][j].eq = get_eq(mat, i, j, i - 1, j) +
+                     + get_eq(mat, i, j, i - 1,j + 1)
+                     + get_eq(mat, i, j, i,j + 1)
+                     + get_eq(mat, i, j, i + 1,j + 1)
+                     + get_eq(mat, i, j, i + 1,j)
+                     + get_eq(mat, i, j, i + 1,j - 1)
+                     + get_eq(mat, i, j, i,j - 1)
+                     + get_eq(mat, i, j, i - 1,j - 1)
+      }
+    }
+  }
+
+
+  function steal_gene(from, /* pass as object as reference */ to) {
+
+    String.prototype.replaceAt=function(index, character) {
+      return this.substr(0, index) + character + this.substr(index+character.length);
+    }
+
+    var x = Math.round(Math.random() * 10);
+    to.gene = to.gene.replaceAt(x, from.charAt(x));
+  }
+
+  function generate_first() {
+    var alphabet = 'qwertyyuiopasdfghjklzxcvbnm';
+    var result = '';
+    for (var i = 1; i < 10; i ++) {
+      result = result + alphabet.charAt( Math.round(Math.random() * 23) );
+    }
+
+    return result;
+  }
+
+  function get_eq(o, i1, j1, i2, j2 ) {
+    if (i2 <= 0) return 0;
+    if (j2 <= 0) return 0;
+    if (i2 > 9) return 0;
+    
+    if (!o[i2][j2]) {
+      return 0;
+    }
+    return get_equality(o[i1][j1], o[i2][j2]);
+  }
+
+  function get_equality(s1, s2) {
+    if (s1.length != s2.length) {
+      console.warn( 'errorl!');
+    }
+    var result = 0;
+    for (var i in s1) {
+      if (s1[i] == s2[i]) {
+        result = result + 1;
+      }
+    }
+    return result;
+  }
+</script>
+</html>

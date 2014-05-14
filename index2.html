@@ -1,6 +1,6 @@
 <html>
 <body>
-  <h1>World with border</h1>
+  <h1>World without border</h1>
   <pre>
   <div id="test">
   </div>
@@ -61,6 +61,8 @@
 
   console.log(mat);
 
+  console.log( 'crc16', crc32( generate_first() ).toString(16).substr(0,6) );
+
   var counter = 0;
 
   var start = function() {
@@ -84,7 +86,6 @@
     var html = '';
     for (var i=1; i < 10; i=i+1) {
       for (var j=1; j < 10; j=j+1) {
-        //html = html + ' ' + '<span style="color:' + mat[i][j].eq + '">' + mat[i][j].gene + '</span>';
         html = html + ' ' + '<span style="color:#' + crc32(mat[i][j].gene).toString(16).substr(0,6) + ';">' + mat[i][j].gene + '</span>';
       }
       html = html + '<br/>';
@@ -103,9 +104,17 @@
         if (x_plus == 0) x = x * -1;
         if (y_plus == 0) y = y * -1;
 
-        if (mat[i + x] && mat[i + x][j + y] && mat[i + x][j + y].eq) {
-          if (mat[i][j].eq < mat[i + x][j + y].eq) {
-            steal_gene(mat[i + x][j + y].gene, mat[i][j]);
+        var n_x = i + x;
+        var n_y = j + y;
+
+        if (n_x == 0) { n_x = 9; }
+        if (n_y == 0) { n_y = 9; }
+        if (n_x == 10) {n_x = 1; }
+        if (n_y == 10) {n_y = 1; }
+
+        if (mat[n_x] && mat[n_x][n_y] && mat[n_x][n_y].eq) {
+          if (mat[i][j].eq < mat[n_x][n_y].eq) {
+            steal_gene(mat[n_x][n_y].gene, mat[i][j]);
           }
         }
 
@@ -150,11 +159,13 @@
   }
 
   function get_eq(o, i1, j1, i2, j2 ) {
-    if (i2 <= 0) return 0;
-    if (j2 <= 0) return 0;
-    if (i2 > 9) return 0;
+    if (i2 == 0) {i2 = 9};
+    if (j2 == 0) {j2 = 9};
+    if (i2 > 9) {i2 = 1};
+    if (j2 > 9) {j2 = 1};
     
     if (!o[i2][j2]) {
+      console.log('xxxx');
       return 0;
     }
     return get_equality(o[i1][j1], o[i2][j2]);
@@ -172,5 +183,7 @@
     }
     return result;
   }
+
+
 </script>
 </html>
